@@ -47,7 +47,13 @@ const urlsToCache = [
 	'favicons/ms-tile-150x150.png',
 	'favicons/ms-tile-310x150.png',
 	'favicons/ms-tile-310x310.png',
-	'favicons/favicon.ico'
+	'favicons/favicon.ico',
+	'config.xml',
+	'favicon.png',
+	'index.html',
+	'jsstore.worker.js',
+	'manifest.json',
+	'styles.css',
 ];
 
 self.addEventListener('install', event => {
