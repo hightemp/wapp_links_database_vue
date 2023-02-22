@@ -21,6 +21,7 @@ module.exports = defineConfig({
       appleTouchIcon: "./icons/icon-152x152.png",
       msTileImage: "./icons/icon-144x144.png",
     },
+    appleMobileWebAppCapable: 'yes',
     manifestOptions: {
       "share_target": {
         "action": "index.html",

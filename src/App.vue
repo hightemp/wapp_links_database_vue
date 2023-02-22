@@ -25,7 +25,7 @@
                   @click="(oE) => fnItemClick(oRow)"
                   @dblclick="(oE) => fnDblItemClick(oRow)"
               >
-                  <div v-for="(oSF, sK) in oStruct" :key="sK" class="cell">
+                  <div v-for="(oSF, sK) in oStruct" :key="sK" :class="'cell '+(sK=='url' ? 'cell-url' : '')">
                     <template v-if="oRow[sK] && sK=='url'">
                       <a :href="oRow[sK]">{{oRow[sK]}}</a>
                     </template>
