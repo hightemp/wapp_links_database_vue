@@ -210,9 +210,15 @@ export default {
 
     const parsedUrl = new URL(window.location);
     const { searchParams } = parsedUrl;
-    console.log("Title shared:", searchParams.get('title'));
-    console.log("Text shared:", searchParams.get('text'));
-    console.log("URL shared:", searchParams.get('url'));
+    if (searchParams.get('title')) {
+      this.fnShowEditWindow({ sFormName: this.sTableName, oItem: {
+        name: searchParams.get('title'),
+        url: searchParams.get('url')
+      } })
+      // console.log("Title shared:", searchParams.get('title'));
+      // console.log("Text shared:", searchParams.get('text'));
+      // console.log("URL shared:", searchParams.get('url'));
+    }
   }
 }
 </script>
