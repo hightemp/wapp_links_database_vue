@@ -16,10 +16,10 @@ module.exports = defineConfig({
     iconPaths: {
       maskIcon: null,
       faviconSVG: null,
-      favicon32: "./favicons/favicon-32x32.png",
-      favicon16: "./favicons/favicon-16x16.png",
-      appleTouchIcon: "./favicons/apple-touch-icon-152x152.png",
-      msTileImage: "./favicons/ms-tile-144x144.png",
+      favicon32: "./icons/icon-32x32.png",
+      favicon16: "./icons/icon-16x16.png",
+      appleTouchIcon: "./icons/icon-152x152.png",
+      msTileImage: "./icons/icon-144x144.png",
     },
     manifestOptions: {
       "share_target": {
@@ -38,23 +38,23 @@ module.exports = defineConfig({
           purpose: "any maskable",
         },
         {
-          'src': './favicons/android-chrome-192x192.png',
+          'src': './icons/icon-192x192.png',
           'sizes': '192x192',
           'type': 'image/png'
         },
         {
-          'src': './favicons/android-chrome-512x512.png',
+          'src': './icons/icon-512x512.png',
           'sizes': '512x512',
           'type': 'image/png'
         },
         {
-          'src': './favicons/android-chrome-maskable-192x192.png',
+          'src': './icons/icon-192x192.png',
           'sizes': '192x192',
           'type': 'image/png',
           'purpose': 'maskable'
         },
         {
-          'src': './favicons/android-chrome-maskable-512x512.png',
+          'src': './icons/icon-512x512.png',
           'sizes': '512x512',
           'type': 'image/png',
           'purpose': 'maskable'
