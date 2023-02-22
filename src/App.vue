@@ -211,6 +211,7 @@ export default {
     const parsedUrl = new URL(window.location);
     const { searchParams } = parsedUrl;
     if (searchParams.get('title')) {
+      alert(searchParams.toString())
       this.fnShowEditWindow({ sFormName: this.sTableName, oItem: {
         name: searchParams.get('title'),
         url: searchParams.get('url')
