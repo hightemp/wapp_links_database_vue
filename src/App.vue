@@ -213,7 +213,7 @@ export default {
     if (searchParams.get('title')) {
       this.fnShowEditWindow({ sFormName: this.sTableName, oItem: {
         name: searchParams.get('title'),
-        url: searchParams.get('text') ? searchParams.get('text') : searchParams.get('url')
+        url: searchParams.get('text') && !searchParams.get('url') ? searchParams.get('text') : searchParams.get('url')
       } })
     }
   }
