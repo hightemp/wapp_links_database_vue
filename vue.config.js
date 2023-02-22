@@ -32,7 +32,7 @@ module.exports = defineConfig({
       icons: [
         {
           src: "./favicon.ico",
-          sizes: "512x512",
+          sizes: "256x256",
           type: "image/ico",
           purpose: "any maskable",
         },
