@@ -14,7 +14,8 @@ module.exports = defineConfig({
     //   msTileImage: 'img/icons/msapplication-icon-144x144.png'
     // },
     iconPaths: {
-      maskicon: null,
+      maskIcon: null,
+      faviconSVG: null,
       favicon32: "./favicons/favicon-32x32.png",
       favicon16: "./favicons/favicon-16x16.png",
       appleTouchIcon: "./favicons/apple-touch-icon-152x152.png",
