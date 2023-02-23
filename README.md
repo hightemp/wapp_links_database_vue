@@ -6,7 +6,7 @@
 
 [Демо](https://hightemp.github.io/wapp_links_database_vue/#)
 
-- Добавлен `share_target` для PWA, т.е. можно отправлять ссылки в приложение.
+- Добавлен `share_target` для PWA, т.е. можно отправлять ссылки в приложение по ссылке `?title=test&url=test`.
 - Добавлена возможность передачи репозитория по ссылке типа `?name=test&login=test2&repo=test&key=&type=github&url=&username=&password=`
     - старый перезаписывается
     - новый добавляется в конец
