@@ -17,6 +17,7 @@ export default createStore({
                 { type:"localstorage", name: "Локальное хранилище" }
             ],
             aReposList: [],
+            oReposFileSystem: { },
             iSelectedRepoIndex: null,
 
             bShowLoader: false,
@@ -46,7 +47,7 @@ export default createStore({
             },
             oDatabase: {
                 table: {
-                    last_index: 100,
+                    last_index: 0,
                     page: 1,
                     data: [
                     ],
@@ -58,12 +59,33 @@ export default createStore({
                         description: "",
                     }
                 },
+                settings: {
+                    data: {
+                        save_to_local: false,
+                        save_to_all_repos: false
+                    },
+                    selection_id: null,
+                    filter: {
+                        id: "", 
+                        label: "", 
+                        type: "",
+                        value: "",
+                    }
+                }
+            },
+            oSettingsForm: {
+                save_to_local: { label: "Сохранять и в локальное хранилище", type:"checkbox", value: false }
+                // save_to_all_repos: { label: "Сохранять все в другие репо", type:"checkbox", value: false }
             },
             oEditWindow: {
                 table:{
                     window_show: false,
                     edit_item: {},
-                }
+                },
+                settings:{
+                    window_show: false,
+                    edit_item: {},
+                },
             },
             oForms: {
                 table: {
@@ -165,6 +187,10 @@ export default createStore({
             state.bShowLoader = false
         },
 
+        fnShowSettingsWindow(state) {
+            state.oEditWindow['settings'].window_show = true
+        },
+
         fnHideEditWindow(state, sFormName) {
             state.oEditWindow[sFormName].window_show = false
         },
@@ -192,7 +218,15 @@ export default createStore({
         fnRemoveFromTable(state, { sTableName, oItem }) {
             state.oDatabase[sTableName][`data`] = state.oDatabase[sTableName][`data`].filter((oI) => oI.id != oItem.id)
             state.iUnsavedChanges++;
-        }
+        },
+        fnCreateFileSystem(state, { iIndex }) {
+            var aRepos = state.aDefaultRepoList.concat(state.aReposList)
+            state.oReposFileSystem[iIndex] = new FileSystemDriver(aRepos[iIndex])
+        },
+        fnSetNeedSaveToCurrentRepo(state) {
+            var aRepos = state.aDefaultRepoList.concat(state.aReposList)
+            aRepos[state.iSelectedRepoIndex].need_save = true
+        },
     },
     actions: {
         fnExportDatabase({ commit, state, dispatch, getters }) {
@@ -211,27 +245,42 @@ export default createStore({
 
         fnPrepareRepo({ commit, state, dispatch, getters }) {
             commit('fnHideRepoWindow')
-            FileSystemDriver.fnInit(getters.oCurrentRepo)
+            commit('fnCreateFileSystem', { iIndex: state.iSelectedRepoIndex })
+            commit('fnSetNeedSaveToCurrentRepo')
             dispatch('fnLoadDatabase')
         },
-        fnSaveDatabase({ commit, state }) {
-            return FileSystemDriver.fnWriteFileJSON(DATABASE_PATH, state.oDatabase, state.sPassword)
+        fnSaveToAllDatabase({ commit, state, getters, dispatch }) {
+            for (var iIndex in getters.aReposList) {
+                var oRepo = getters.aReposList[iIndex]
+                if (oRepo.need_save) {
+                    if (!state.oReposFileSystem[iIndex]) {
+                        commit('fnCreateFileSystem', { iIndex: iIndex })
+                    }
+                    dispatch('fnSaveDatabase', { oFileSystem: state.oReposFileSystem[iIndex] });
+                }
+            }
+        },
+        fnSaveCurrentDatabase({ commit, state, getters, dispatch }) {
+            dispatch('fnSaveDatabase', { oFileSystem: getters.oCurrentFileSystem });
+        },
+        fnSaveDatabase({ commit, state, getters }, { oFileSystem } ) {
+            return oFileSystem.fnWriteFileJSON(DATABASE_PATH, state.oDatabase, state.sPassword)
                 .then(() => {
                     state.iUnsavedChanges = 0;
                 })
                 .catch(() => {
-                    FileSystemDriver.fnReadFile(DATABASE_PATH)
+                    oFileSystem.fnReadFile(DATABASE_PATH)
                         .then(() => {
-                            return FileSystemDriver.fnWriteFileJSON(DATABASE_PATH, state.oDatabase, state.sPassword)
+                            return oFileSystem.fnWriteFileJSON(DATABASE_PATH, state.oDatabase, state.sPassword)
                                 .then(() => {
                                     state.iUnsavedChanges = 0;
                                 })
                         })
                 })
         },
-        fnLoadDatabase({ commit, state }) {
-            commit('fnShowLoader')
-            FileSystemDriver
+        fnLoadDatabase({ commit, state, getters }) {
+            commit('fnShowLoader')            
+            getters.oCurrentFileSystem
                 .fnReadFileJSON(DATABASE_PATH, state.sPassword)
                 .then((mData) => {
                     if (!mData) throw "Cannot destructure property"
@@ -248,9 +297,9 @@ export default createStore({
                     }
                     if ((oE+"").match(/Cannot destructure property/)
                         || (oE+"").match(/Not Found/)) {
-                        FileSystemDriver.fnWriteFileJSON(DATABASE_PATH, state.oDatabase, state.sPassword)
+                            getters.oCurrentFileSystem.fnWriteFileJSON(DATABASE_PATH, state.oDatabase, state.sPassword)
                             .then(() => {
-                                FileSystemDriver
+                                getters.oCurrentFileSystem
                                     .fnReadFileJSON(DATABASE_PATH, state.sPassword)
                                     .then((mData) => { 
                                         commit('fnUpdateDatabase', mData)
@@ -270,6 +319,10 @@ export default createStore({
         },
     },
     getters: {
+        fnGetSetting: (state) => (sName) => {
+            return state.oDatabase['settings'].data[sName]
+        },
+
         fnGetFieldValue: (state) => (sFormName, sFieldName) => {
             return state.oForms[sFormName][sFieldName]
         },
@@ -278,6 +331,9 @@ export default createStore({
         },
         oCurrentRepo(state, getters) {
             return getters.aReposList[state.iSelectedRepoIndex]
+        },
+        oCurrentFileSystem(state, getters) {
+            return state.oReposFileSystem[state.iSelectedRepoIndex]
         },
 
         fnFilterGroups: (state) => (sFilter) => {

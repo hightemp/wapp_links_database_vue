@@ -102,6 +102,11 @@
             <input type="week" class="form-control" :placeholder="oItem.placeholder" v-model="mValue">
         </div>
     </template>
+    <template v-if="oItem.type=='checkbox'">
+        <div class="mb-3">
+            <label class="form-label"><input type="checkbox" v-model="mValue" :value="oItem.value"> {{oItem.label}} </label>
+        </div>
+    </template>
     <template v-if="oItem.type=='checkbox_list'">
         <div class="mb-3">
             <label class="form-label">{{oItem.label}}</label>

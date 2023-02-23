@@ -2,6 +2,15 @@
   <div class="wrapper">
     <div class="left-panel">
       <button v-for="(oMenuItem, iI) in aMenu" :key="iI" class="btn btn-menu" @click="fnClickLeftMenu(oMenuItem)" :title="oMenuItem.title">
+        <template v-if="oMenuItem.id=='save'">
+          <div class="repos-list">
+            <template v-for="oRepo in aReposList" :key="oRepo">
+              <div class="repo-list_item">
+                <label><input type="checkbox" v-model="oRepo.need_save" />{{ oRepo.name }}</label>
+              </div>
+            </template>
+          </div>
+        </template>
         <i :class="'bi '+oMenuItem.icon"></i>
         <template v-if="oMenuItem.id=='save' && iUnsavedChanges">
           <span class="badge">{{iUnsavedChanges}}</span>
@@ -55,6 +64,7 @@
 
   <edit_window title="Редактирование" :form_name="sTableName" :table_name="sTableName" />
   <repo_window />
+  <settings_window />
   <saved_toast />
   <loader/>
 </template>
@@ -65,6 +75,7 @@ import { a, cc } from "./lib"
 
 import edit_window from "./components/edit_window.vue"
 import repo_window from "./components/repo_window.vue"
+import settings_window from "./components/settings_window.vue"
 import saved_toast from "./components/saved_toast.vue"
 import loader from './components/loader.vue'
 
@@ -73,12 +84,14 @@ export default {
   components: {
     edit_window,
     repo_window,
+    settings_window,
     saved_toast,
     loader,
   },
 
   computed: {
     ...cc(`bShowRepoWindow bShowSaveToast sPassword`),
+    ...mapGetters(a`aReposList`),
     ...mapState(a`iUnsavedChanges`),
     sHeaderStyles() {
       return {display:'grid', 'grid-template-columns': '1fr '.repeat(this.iStructLength) }
@@ -130,6 +143,7 @@ export default {
         { id: "edit", title: "Редактировать", icon: "bi-pencil" },
         { id: "remove", title: "Удалить", icon: "bi-trash" },
         // { id: "import", title: "Импортировать", icon: "bi-box-arrow-in-up" },
+        { id: "settings", title: "Настройки", icon: "bi-gear" },
         { id: "export", title: "Экспортировать", icon: "bi-box-arrow-down" },
       ],
       oSelectedItem: null,
@@ -138,8 +152,8 @@ export default {
   },
 
   methods: {
-    ...mapMutations(a`fnLoadRepos fnShowEditWindow fnRemoveFromTable`),
-    ...mapActions(a`fnSaveDatabase fnExportDatabase fnImportDatabase`),
+    ...mapMutations(a`fnLoadRepos fnShowEditWindow fnRemoveFromTable fnShowSettingsWindow`),
+    ...mapActions(a`fnSaveToAllDatabase fnSaveCurrentDatabase fnSaveDatabase fnExportDatabase fnImportDatabase`),
     fnFirst() {
         this.iPage = 1
     },
@@ -195,6 +209,9 @@ export default {
       if (oItem.id == "export") {
         this.fnExport()
       }
+      if (oItem.id == "settings") {
+        this.fnShowSettingsWindow()
+      }
     },
     fnItemClick(oRow) {
       this.oSelectedItem = oRow
@@ -220,7 +237,8 @@ export default {
         }
     },
     fnSaveAll() {
-      this.fnSaveDatabase()
+      // this.fnSaveCurrentDatabase()
+      this.fnSaveToAllDatabase()
       this.bShowSaveToast = true
     },
     fnExport() {

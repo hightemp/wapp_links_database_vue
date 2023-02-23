@@ -4,51 +4,56 @@ import { encode, decode } from 'js-base64'
 
 export class FileSystemDriver {
     /** @var Octokit octokit */
-    static octokit = null
-    static oSHA = {}
+    octokit = null
+    oSHA = {}
 
     /** @var WebDAVClient webdav */
-    static webdav = null
+    webdav = null
 
-    static oRepoItem = null
+    oRepoItem = null
 
     // ===============================================================
 
-    static fnInit(oRepoItem)
+    constructor (oRepoItem) {
+        console.log()
+        this.fnInit(oRepoItem)
+    }
+
+    fnInit(oRepoItem)
     {
-        FileSystemDriver.oRepoItem = oRepoItem
+        this.oRepoItem = oRepoItem
 
         if (oRepoItem.type == "github") {
-            FileSystemDriver.fnInitGit()
+            this.fnInitGit()
         }
         if (oRepoItem.type == "webdav") {
-            FileSystemDriver.fnInitWebdav()
+            this.fnInitWebdav()
         }
         if (oRepoItem.type == "localstorage") {
         }
     }
 
-    static fnInitGit()
+    fnInitGit()
     {
-        FileSystemDriver.octokit = new Octokit({
-            auth: FileSystemDriver.oRepoItem.key,
+        this.octokit = new Octokit({
+            auth: this.oRepoItem.key,
         });
     }
 
-    static fnInitWebdav()
+    fnInitWebdav()
     {
-        FileSystemDriver.webdav = createClient(
-            FileSystemDriver.oRepoItem.url,
+        this.webdav = createClient(
+            this.oRepoItem.url,
             {
-                username: FileSystemDriver.oRepoItem.username,
-                password: FileSystemDriver.oRepoItem.password
+                username: this.oRepoItem.username,
+                password: this.oRepoItem.password
             }
         );
     }
 
     // ===============================================================
     
-    static fnReadFileJSON(sFilePath)
+    fnReadFileJSON(sFilePath)
     {
         return new Promise((fnResolv, fnReject) => {
             this.fnReadFile(sFilePath)
@@ -59,56 +64,56 @@ export class FileSystemDriver {
         })
     }
 
-    static fnReadFile(sFilePath)
+    fnReadFile(sFilePath)
     {
-        if (FileSystemDriver.oRepoItem.type == "localstorage") {
-            return FileSystemDriver.fnReadFileLocalStorage(sFilePath)
+        if (this.oRepoItem.type == "localstorage") {
+            return this.fnReadFileLocalStorage(sFilePath)
         }
-        if (FileSystemDriver.oRepoItem.type == "github") {
-            return FileSystemDriver.fnReadFileGithub(sFilePath)
+        if (this.oRepoItem.type == "github") {
+            return this.fnReadFileGithub(sFilePath)
         }
-        if (FileSystemDriver.oRepoItem.type == "webdav") {
-            return FileSystemDriver.fnReadFileWebdav(sFilePath)
+        if (this.oRepoItem.type == "webdav") {
+            return this.fnReadFileWebdav(sFilePath)
         }
     }
 
-    static fnWriteFileJSON(sFilePath, mData)
+    fnWriteFileJSON(sFilePath, mData)
     {
         return this.fnWriteFile(sFilePath, JSON.stringify(mData, null, 4))
     }
 
-    static fnWriteFile(sFilePath, sData)
+    fnWriteFile(sFilePath, sData)
     {
-        if (FileSystemDriver.oRepoItem.type == "localstorage") {
-            return FileSystemDriver.fnWriteFileLocalStorage(sFilePath, sData)
+        if (this.oRepoItem.type == "localstorage") {
+            return this.fnWriteFileLocalStorage(sFilePath, sData)
         }
-        if (FileSystemDriver.oRepoItem.type == "github") {
-            return FileSystemDriver.fnWriteFileGithub(sFilePath, sData)
+        if (this.oRepoItem.type == "github") {
+            return this.fnWriteFileGithub(sFilePath, sData)
         }
-        if (FileSystemDriver.oRepoItem.type == "webdav") {
-            return FileSystemDriver.fnWriteFileWebdav(sFilePath, sData)
+        if (this.oRepoItem.type == "webdav") {
+            return this.fnWriteFileWebdav(sFilePath, sData)
         }
     }
 
-    static fnCreateDir(sFilePath)
+    fnCreateDir(sFilePath)
     {
-        if (FileSystemDriver.oRepoItem.type == "webdav") {
-            return FileSystemDriver.fnCreateDirWebdav(sFilePath)
+        if (this.oRepoItem.type == "webdav") {
+            return this.fnCreateDirWebdav(sFilePath)
         }
     }
 
     // ===============================================================
 
-    static fnCreateDirWebdav(sFilePath)
+    fnCreateDirWebdav(sFilePath)
     {
         return new Promise((fnResolv, fnReject) => {
             _l(">>>", sFilePath)
-            FileSystemDriver.webdav.createDirectory(sFilePath)
+            this.webdav.createDirectory(sFilePath)
             fnResolv();
         })
     }
 
-    static fnReadFileLocalStorage(sFilePath)
+    fnReadFileLocalStorage(sFilePath)
     {
         return new Promise(async (fnResolv, fnReject) => {
             var sData = localStorage.getItem(sFilePath);
@@ -116,16 +121,16 @@ export class FileSystemDriver {
         })
     }
 
-    static fnReadFileWebdav(sFilePath)
+    fnReadFileWebdav(sFilePath)
     {
-        var oR = FileSystemDriver.oRepoItem
+        var oR = this.oRepoItem
 
         return new Promise(async (fnResolv, fnReject) => {
             try {
-                var oData = (await FileSystemDriver.webdav.getFileContents(sFilePath))
+                var oData = (await this.webdav.getFileContents(sFilePath))
                 var enc = new TextDecoder("utf-8");
                 var sData = enc.decode(oData)
-                FileSystemDriver.oSHA[sFilePath] = ""
+                this.oSHA[sFilePath] = ""
                 fnResolv({ sData, sSHA:"" })
             } catch (oE) {
                 console.error(oE)
@@ -134,20 +139,20 @@ export class FileSystemDriver {
         })
     }
 
-    static fnReadFileGithub(sFilePath)
+    fnReadFileGithub(sFilePath)
     {
         return new Promise(async (fnResolv, fnReject) => {
-            var oR = FileSystemDriver.oRepoItem
+            var oR = this.oRepoItem
             console.log('read', oR)
             sFilePath = sFilePath.replace(/^\/+/, '')
-            return FileSystemDriver.octokit.rest.repos.getContent({
+            return this.octokit.rest.repos.getContent({
                 owner: oR.login,
                 repo: oR.repo,
                 path: sFilePath,
             }).then(({ data }) => {
                 var sData = decode(data.content)
-                FileSystemDriver.oSHA[sFilePath] = data.sha
-                console.log(FileSystemDriver.oSHA)
+                this.oSHA[sFilePath] = data.sha
+                console.log(this.oSHA)
                 fnResolv({sData, sSHA: data.sha})
             }).catch((oE) => {
                 console.error(oE)
@@ -156,7 +161,7 @@ export class FileSystemDriver {
         })
     }
 
-    static fnWriteFileLocalStorage(sFilePath, sData)
+    fnWriteFileLocalStorage(sFilePath, sData)
     {
         return new Promise(async (fnResolv, fnReject) => {
             localStorage.setItem(sFilePath, sData)
@@ -164,18 +169,18 @@ export class FileSystemDriver {
         })
     }
 
-    static fnWriteFileGithub(sFilePath, sData, sSHA=null)
+    fnWriteFileGithub(sFilePath, sData, sSHA=null)
     {
         return new Promise(async (fnResolv, fnReject) => {
-            var oR = FileSystemDriver.oRepoItem
+            var oR = this.oRepoItem
             console.log('write', oR)
             sFilePath = sFilePath.replace(/^\/+/, '')
-            return FileSystemDriver.octokit.rest.repos.createOrUpdateFileContents({
+            return this.octokit.rest.repos.createOrUpdateFileContents({
                 owner: oR.login,
                 repo: oR.repo,
                 path: sFilePath,
-                sha: sSHA ? sSHA : FileSystemDriver.oSHA[sFilePath],
-                message: FileSystemDriver.fnGetUpdateMessage(),
+                sha: sSHA ? sSHA : this.oSHA[sFilePath],
+                message: this.fnGetUpdateMessage(),
                 content: encode(sData)
             })
             .then(() => {
@@ -188,16 +193,16 @@ export class FileSystemDriver {
         })
     }
 
-    static fnWriteFileWebdav(sFilePath, sData)
+    fnWriteFileWebdav(sFilePath, sData)
     {
         return new Promise(async (fnResolv, fnReject) => {
-            var oR = FileSystemDriver.oRepoItem
+            var oR = this.oRepoItem
 
             return new Promise(async (fnResolv, fnReject) => {
                 try {
                     var enc = new TextEncoder()
                     var aData = enc.encode(sData)
-                    await FileSystemDriver.webdav.putFileContents(
+                    await this.webdav.putFileContents(
                         sFilePath, 
                         aData,
                         { contentLength: false, overwrite: true }
@@ -211,7 +216,7 @@ export class FileSystemDriver {
         })
     }
 
-    static fnGetUpdateMessage() {
+    fnGetUpdateMessage() {
         return "update: "+(new Date())
     }
 }
