@@ -15,7 +15,6 @@ export class FileSystemDriver {
     // ===============================================================
 
     constructor (oRepoItem) {
-        console.log()
         this.fnInit(oRepoItem)
     }
 
