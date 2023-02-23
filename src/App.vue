@@ -10,6 +10,20 @@
       <button class="btn btn-import" title="Импортировать"><i class="bi bi-box-arrow-in-up"></i><label><input type="file" ref="file_selector" @change="fnFileImportChange" /></label></button>
     </div>
     <div class="table-panel">
+      <div class="table-actions-panel">
+        <div class="spacer"></div>
+        <button class="btn btn-light" @click="fnFirst"><i class="bi bi-chevron-bar-left"></i></button>
+        <button class="btn btn-light" @click="fnPrevShift"><i class="bi bi-chevron-double-left"></i></button>
+        <button class="btn btn-light" @click="fnPrev"><i class="bi bi-chevron-compact-left"></i></button>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" v-model="iPage" />
+            <span class="input-group-text" id="basic-addon1">/ {{iMaxPages}}</span>
+        </div>
+        <button class="btn btn-light" @click="fnNext"><i class="bi bi-chevron-compact-right"></i></button>
+        <button class="btn btn-light" @click="fnNextShift"><i class="bi bi-chevron-double-right"></i></button>
+        <button class="btn btn-light" @click="fnLast"><i class="bi bi-chevron-bar-right"></i></button>
+        <div class="spacer"></div>
+      </div>
       <div class="table">
           <div class="table-row header" :style="sHeaderStyles">
               <div v-for="(oSF, sK) in oStruct" :key="sK" class="cell header">
@@ -18,7 +32,7 @@
               </div>
           </div>
           <!-- {{aRows}} -->
-          <template v-for="oRow in aRows" :key="oRow">
+          <template v-for="oRow in aSlicedRows" :key="oRow">
               <div 
                   :class="'table-row '+(oSelectedItem && oSelectedItem.id == oRow.id ? 'active' : '')" 
                   :style="sHeaderStyles" 
@@ -81,23 +95,28 @@ export default {
     iMaxPages() {
         return Math.ceil(this.aRows.length / this.iPageCount)
     },
+    iPage: {
+      get() { return this.$store.state.oDatabase['table'].page },
+      set(sV) { this.$store.state.oDatabase['table'].page = sV*1 },
+    },
+    iPageCount() {
+      return Math.floor((window.innerHeight - 60 - 30) / 27)
+    },
     aRows() {
         var aRows = this.oTable.data.filter((oI) => {
             var bResult = true;
             for (var sK in this.oTable.filter) {
-                console.log(this.oTable.filter[sK])
                 if (this.oTable.filter[sK]) {
-                    console.log(this.oTable.filter[sK])
                     bResult = bResult && ~oI[sK].indexOf(this.oTable.filter[sK])
                 }
             }
             return bResult
         })
 
-        return aRows;
+        return aRows
     },
     aSlicedRows() {
-        var aRows = this.aRows.slice((this.sPage-1)*this.iPageCount, this.sPage*this.iPageCount)
+        var aRows = this.aRows.slice((this.iPage-1)*this.iPageCount, this.iPage*this.iPageCount)
         return aRows;
     },
   },
@@ -121,6 +140,36 @@ export default {
   methods: {
     ...mapMutations(a`fnLoadRepos fnShowEditWindow fnRemoveFromTable`),
     ...mapActions(a`fnSaveDatabase fnExportDatabase fnImportDatabase`),
+    fnFirst() {
+        this.iPage = 1
+    },
+    fnPrevShift() {
+        if (this.iPage>5) {
+            this.iPage-=5
+        } else {
+          this.iPage = 1
+        }
+    },
+    fnPrev() {
+        if (this.iPage>1) {
+            this.iPage-=1
+        }
+    },
+    fnLast() {
+        this.iPage = this.iMaxPages
+    },
+    fnNextShift() {
+        if (this.iPage<this.iMaxPages-5) {
+            this.iPage+=5
+        } else {
+          this.iPage = this.iMaxPages
+        }
+    },
+    fnNext() {
+        if (this.iPage<this.iMaxPages) {
+            this.iPage+=1
+        }
+    },
     fnCopyToClipboard(sText) {
       navigator.clipboard.writeText(sText);
     },

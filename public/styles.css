@@ -49,7 +49,7 @@ body, html {
 
 .list-repo-item {
     display: grid;
-    grid-template-columns: 1fr 100px;
+    grid-template-columns: 1fr 140px;
     padding: 5px;
 }
 
@@ -199,6 +199,7 @@ body, html {
     background: red;
     border-radius: 3px !important;
     margin-left: -10px;
+    z-index: 5;
 }
 
 

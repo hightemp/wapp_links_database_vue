@@ -94,8 +94,10 @@
                                         <template v-if="oItem.type!='localstorage'">
                                         <button class="btn btn-success" @click="fnEditRepo(iIndex)" title="Редактировать"><i class="bi bi-pencil"></i></button>
                                         <button class="btn btn-danger" @click="fnRemoveRepo(iIndex)" title="Удалить"><i class="bi bi-trash"></i></button>
+                                        <a class="btn btn-secondary" :href="fnObjToURLParams(oItem)"><i class="bi bi-link"></i></a>
                                         </template>
                                         <template v-else>
+                                            <div style="width: 32px; height: 29px"></div>
                                             <div style="width: 32px; height: 29px"></div>
                                             <div style="width: 32px; height: 29px"></div>
                                         </template>
@@ -149,6 +151,9 @@
         methods: {
             ...mapMutations(a`fnReposRemove fnReposSelect fnReposClean fnReposUpdate`),
             ...mapActions(a`fnPrepareRepo fnExportRepos fnImportRepos`),
+            fnObjToURLParams(oItem) {
+                return "?"+(new URLSearchParams(oItem).toString())
+            },
             fnSaveRepo() {
                 if (!this.sFormName) {
                     alert('Надо заполнить поле - Название')

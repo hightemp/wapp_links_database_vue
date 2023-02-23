@@ -47,6 +47,7 @@ export default createStore({
             oDatabase: {
                 table: {
                     last_index: 100,
+                    page: 1,
                     data: [
                     ],
                     selection_id: null,
@@ -115,8 +116,32 @@ export default createStore({
             localStorage.setItem('aReposList', JSON.stringify(state.aReposList))
         },
         fnLoadRepos(state) {
-            try { 
+            try {
                 state.aReposList = JSON.parse(localStorage.getItem('aReposList') || '[]')
+                const parsedUrl = new URL(window.location);
+                const { searchParams } = parsedUrl;
+                if (searchParams.get('type')) {
+                    var oNewItem = {
+                        type: searchParams.get('type'),
+                        name: searchParams.get('name'),
+                        login: searchParams.get('login'),
+                        repo: searchParams.get('repo'),
+                        key: searchParams.get('key'),
+                        url: searchParams.get('url'),
+                        username: searchParams.get('username'),
+                        password: searchParams.get('password'),
+                    }
+                    var oItem = state.aReposList.find((oI) => oI.name == oNewItem.name)
+                    if (oItem) {
+                        for (var sK in oNewItem) {
+                            oItem[sK] = oNewItem[sK]
+                        }
+                        localStorage.setItem('aReposList', JSON.stringify(state.aReposList))
+                    } else {
+                        state.aReposList.push(oNewItem)
+                        localStorage.setItem('aReposList', JSON.stringify(state.aReposList))
+                    }
+                }
                 // state.sPassword = (localStorage.getItem('sPassword') || "")
             } catch(_) {
 
