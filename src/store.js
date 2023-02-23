@@ -74,7 +74,7 @@ export default createStore({
                 }
             },
             oSettingsForm: {
-                save_to_local: { label: "Сохранять и в локальное хранилище", type:"checkbox", value: false }
+                // save_to_local: { label: "Сохранять и в локальное хранилище", type:"checkbox", value: false }
                 // save_to_all_repos: { label: "Сохранять все в другие репо", type:"checkbox", value: false }
             },
             oEditWindow: {
